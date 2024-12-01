@@ -44,3 +44,11 @@ class OrderResult(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_deleted = models.BooleanField(default=False)
     deleted_time = models.DateTimeField(null=True, blank=True)
+    
+class File(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='files')
+    path = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"File {self.id} for Order {self.order.id}"

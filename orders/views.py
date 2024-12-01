@@ -1,6 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
-from .models import Company, Order, OrderDetail, OrderResult
-from .serializers import CompanySerializer, OrderSerializer, OrderDetailSerializer, OrderResultSerializer
+from .models import Company, File, Order, OrderDetail, OrderResult
+from .serializers import CompanySerializer, FileSerializer, OrderSerializer, OrderDetailSerializer, OrderResultSerializer
 
 class CompanyViewSet(ModelViewSet):
     queryset = Company.objects.all()
@@ -17,3 +17,7 @@ class OrderDetailViewSet(ModelViewSet):
 class OrderResultViewSet(ModelViewSet):
     queryset = OrderResult.objects.all()
     serializer_class = OrderResultSerializer
+
+class FileViewSet(ModelViewSet):
+    queryset = File.objects.all()
+    serializer_class = FileSerializer

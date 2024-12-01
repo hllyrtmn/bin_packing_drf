@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Company, Order, OrderDetail, OrderResult
+from .models import Company, File, Order, OrderDetail, OrderResult
 
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,4 +25,9 @@ class OrderResultSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderResult
+        fields = '__all__'
+        
+class FileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = File
         fields = '__all__'
