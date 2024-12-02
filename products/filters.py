@@ -2,6 +2,7 @@ import django_filters
 from .models import Product
 from products import models
 from django.db.models import Q
+from rest_framework.filters import BaseFilterBackend
 
 class ProductFilter(django_filters.FilterSet):
     product_id = django_filters.CharFilter(field_name="id", lookup_expr='icontains')
@@ -26,3 +27,10 @@ class ProductSearch(django_filters.FilterSet):
         return queryset.filter(
             Q(id__icontains=value) | Q(product_type__code__icontains=value)
         )
+
+class CustomOrderingFilter(BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        ordering = request.query_params.get('ordering')
+        if ordering == 'custom_order':
+            return queryset.order_by('created_at')  # Özel sıralama
+        return queryset
