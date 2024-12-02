@@ -1,18 +1,20 @@
 from rest_framework.viewsets import ModelViewSet
 
-from .filters import ProductFilter
+from .filters import ProductFilter,ProductSearch
 from products.pagination import CustomPagination
 from .models import ProductType, Dimension, WeightType, Product
 from .serializers import ProductTypeSerializer, DimensionSerializer, WeightTypeSerializer, ProductSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAdminUser
 from core.permissions import IsOwnerOrReadOnly
+from rest_framework.filters import SearchFilter
+
 
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = ProductFilter
+    filter_backends = [DjangoFilterBackend,SearchFilter]
+    filterset_class = ProductSearch
     permission_classes = [IsOwnerOrReadOnly]
     
 class ProductTypeViewSet(ModelViewSet):
