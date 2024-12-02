@@ -1,4 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
+
+from products.pagination import CustomPagination
 from .models import ProductType, Dimension, WeightType, Product
 from .serializers import ProductTypeSerializer, DimensionSerializer, WeightTypeSerializer, ProductSerializer
 
@@ -9,6 +11,7 @@ class ProductTypeViewSet(ModelViewSet):
 class DimensionViewSet(ModelViewSet):
     queryset = Dimension.objects.all()
     serializer_class = DimensionSerializer
+    pagination_class = CustomPagination
 
 class WeightTypeViewSet(ModelViewSet):
     queryset = WeightType.objects.all()
