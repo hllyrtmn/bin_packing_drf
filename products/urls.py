@@ -5,6 +5,6 @@ router = DefaultRouter()
 router.register('product-types', ProductTypeViewSet)
 router.register('dimensions', DimensionViewSet)
 router.register('weight-types', WeightTypeViewSet)
-router.register('products', ProductViewSet)
+router.register('', ProductViewSet)
 
 urlpatterns = router.urls

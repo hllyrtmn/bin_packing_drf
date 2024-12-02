@@ -21,12 +21,14 @@ class ProductTypeViewSet(ModelViewSet):
     queryset = ProductType.objects.all()
     serializer_class = ProductTypeSerializer
     pagination_class = CustomPagination
+    permission_classes = [IsOwnerOrReadOnly]
 
 class DimensionViewSet(ModelViewSet):
     queryset = Dimension.objects.all()
     serializer_class = DimensionSerializer
+    permission_classes = [IsOwnerOrReadOnly]
     
 class WeightTypeViewSet(ModelViewSet):
     queryset = WeightType.objects.all()
     serializer_class = WeightTypeSerializer
-
+    permission_classes = [IsOwnerOrReadOnly]
