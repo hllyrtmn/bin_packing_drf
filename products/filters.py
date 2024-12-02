@@ -30,7 +30,10 @@ class ProductSearch(django_filters.FilterSet):
 
 class CustomOrderingFilter(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
+        print("CustomOrderingFilter is being called!")  # Kontrol amaçlı
         ordering = request.query_params.get('ordering')
-        if ordering == 'custom_order':
+        print(ordering)
+        if ordering == 'created_at':
+            print("Applying custom ordering")
             return queryset.order_by('created_at')  # Özel sıralama
         return queryset

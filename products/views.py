@@ -13,10 +13,9 @@ from rest_framework.filters import SearchFilter,OrderingFilter
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    filter_backends = [DjangoFilterBackend,SearchFilter,CustomOrderingFilter,OrderingFilter]
+    filter_backends = [DjangoFilterBackend,SearchFilter,CustomOrderingFilter]
     filterset_class = ProductSearch
     permission_classes = [IsOwnerOrReadOnly]
-    ordering_fields = ['created_at']
     
 class ProductTypeViewSet(ModelViewSet):
     queryset = ProductType.objects.all()
