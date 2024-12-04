@@ -47,8 +47,11 @@ class OrderResult(models.Model):
     
 class File(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='files')
-    path = models.CharField(max_length=255)
+    path = models.CharField(max_length=255,default='drf')
+    order = models.ForeignKey('orders.Order', on_delete=models.CASCADE, related_name='files', null=True, blank=True)
+    file = models.FileField(upload_to='uploads/')
+    status = models.CharField(max_length=50, default='pending')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"File {self.id} for Order {self.order.id}"
+        return f"File {self.id} for Order {self.order.id if self.order else 'No Order'}"

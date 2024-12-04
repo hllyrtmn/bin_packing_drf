@@ -6,6 +6,6 @@ router.register('companies', CompanyViewSet)
 router.register('orders', OrderViewSet)
 router.register('order-details', OrderDetailViewSet)
 router.register('order-results', OrderResultViewSet)
-router.register('files', FileViewSet)
+router.register(r'files', FileViewSet)
 
 urlpatterns = router.urls
