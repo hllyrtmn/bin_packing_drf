@@ -1,9 +1,15 @@
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from .views import PalletViewSet, PackageViewSet, PackageDetailViewSet
+from logistics.views.calculate_package_view import CalculatePackageView
 
 router = DefaultRouter()
 router.register('pallets', PalletViewSet)
 router.register('packages', PackageViewSet)
 router.register('package-details', PackageDetailViewSet)
 
-urlpatterns = router.urls
+
+urlpatterns = [
+    path('', include(router.urls)),
+    path('calculate-box/<uuid:order_id>/', CalculatePackageView.as_view(), name='calculate-box'),
+]

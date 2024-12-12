@@ -23,18 +23,18 @@ class FileProcessingService:
 
         # Şirketi bul veya oluştur
         company, created = Company.objects.get_or_create(company_name=company_name)
-
+        file_instance.order.company = company
         # Dosyaya bağlı Order güncelle veya oluştur
-        order = Order.objects.create(
-            company=company,
-            date=now(),
-        )
-        file_instance.order = order
+        # order = Order.objects.create(
+        #     company=company,
+        #     date=now(),
+        # )
+        # file_instance.order = order
         file_instance.save()
 
         # Ürün bilgilerini işle
         product_data = df.iloc[13:, [1, 2, 3, 4, 5]]  # 14. satırdan itibaren veriler
-        FileProcessingService._process_products(order, product_data)
+        FileProcessingService._process_products(file_instance.order, product_data)
 
     @staticmethod
     def _process_products(order, product_data):
@@ -43,25 +43,27 @@ class FileProcessingService:
         """
         
         for _, row in product_data.iterrows():
-            product_type_code = row[2]
             product_type_type = str(row[1])
+            product_type_code = row[2]
+            
             width = Decimal(row[3])
-            height = Decimal(row[4])
+            depth = Decimal(row[4])
             count = int(row[5])
             # Ürünü bul
             product = Product.objects.filter(
                 product_type__code=product_type_code,
                 product_type__type=product_type_type,
                 dimension__width=width,
-                dimension__height=height
+                dimension__depth=depth
             ).first()
 
             if product:
                 # OrderDetail oluştur
-                OrderDetail.objects.create(
+                OrderDetail.objects.get_or_create(
                     order=order,
                     product=product,
                     count=count  # Ürün adedi için bir varsayılan değer kullanılabilir veya dosyadan alınabilir
                 )
             else:
                 print(f"Eşleşen ürün bulunamadı: {row}")
+        
