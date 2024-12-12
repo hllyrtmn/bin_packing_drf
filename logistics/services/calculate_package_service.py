@@ -3,41 +3,63 @@ import copy
 from typing import List
 
 from logistics.models import PackageDetail,Package, Pallet
+from logistics.serializers import PackageDetailSerializer
 from orders.models import OrderDetail
+from products.models import Product
 
 
 class CalculatePackageService:
     @staticmethod
-    def convert_units(value, from_unit, to_unit):
+    def save_packages_and_details_to_db(package_details,order_id):
         """
-        Birim dönüşümü yapan yardımcı fonksiyon.
-        `value`: Dönüştürülecek değer
-        `from_unit`: Şu anki birim ('cm' veya 'mm')
-        `to_unit`: Dönüştürmek istediğiniz birim ('cm' veya 'mm')
+        Gelen package_details verilerini kullanarak Package ve PackageDetail kayıtlarını oluşturur.
         """
-        if from_unit == 'cm' and to_unit == 'mm':
-            return value * 10  # cm'den mm'ye çevir
-        elif from_unit == 'mm' and to_unit == 'cm':
-            return value / 10  # mm'den cm'ye çevir
-        return value  # Eğer birimler zaten aynıysa, dönüşüm gerekmez
+        package_map = {}
+
+        for detail_data in package_details:
+            # Package oluştur veya al
+            
+            package_id = detail_data.package_id
+            if package_id not in package_map:
+                package = Package.objects.create(
+                    id=package_id,
+                    order_id=order_id,
+                    pallet_id=detail_data.package.pallet_id,
+                    rotation=detail_data.package.rotation
+                )
+                package_map[package_id] = package
+            else:
+                package = package_map[package_id]
+
+
+            PackageDetail.objects.create(
+                package_id = package.id,
+                product_id = detail_data.product_id,
+                count = detail_data.count
+            )
+        return 1
+            
         
     
     @staticmethod
     def create_packages(order_details:List[OrderDetail],pallets:List[Pallet]):
-        packages:List[PackageDetail]
+        package_details:List[PackageDetail]
+        packages:List[Package]
         
-        remaining_products,packages =  CalculatePackageService.place_products_in_pallets(order_details, pallets)
+        remaining_products,package_details,packages =  CalculatePackageService.place_products_in_pallets(order_details, pallets)
         
         if remaining_products:
-            remaining_packages = CalculatePackageService.place_remaining_products_in_boxes(remaining_products, pallets)
-            packages.extend(remaining_packages)
+            remaining_packages,packages_remaining = CalculatePackageService.place_remaining_products_in_boxes(remaining_products, pallets)
+            package_details.extend(remaining_packages)
+            packages.extend(packages_remaining)
             
-        return packages
+        return package_details
         
      
     @staticmethod
     def place_remaining_products_in_boxes(remaining_order_details:List[OrderDetail],pallets:List[Pallet]):
-        packages:List[PackageDetail] = []
+        package_details:List[PackageDetail] = []
+        packages:List[Package] = []
         grouped_order_details = CalculatePackageService.group_products_by_dimension(remaining_order_details)
         for group in grouped_order_details:
             while group:
@@ -51,8 +73,6 @@ class CalculatePackageService:
                 
                 boxes_needed = int((total_quantity + total_capacity - 1) // total_capacity)
                 
-                
-                
                 for _ in range(boxes_needed):
                     if total_quantity <= 0:
                         break
@@ -60,7 +80,7 @@ class CalculatePackageService:
                     total_placed = 0
                     
                     package=Package(order=None,pallet=best_pallet,rotation="V")
-                    
+                    packages.append(package)
                     for order_detail in group:
                         if total_placed >= placed_quantity:
                             package.order = order_detail.order
@@ -71,7 +91,7 @@ class CalculatePackageService:
                             total_placed += 1
                             package_detail_instance.count += 1
                         if package_detail_instance.count > 0:
-                            packages.append(package_detail_instance)
+                            package_details.append(package_detail_instance)
                     group = [order_detail for order_detail in group if order_detail.count > 0]       
                     total_quantity -= placed_quantity 
                     if total_quantity == 0:
@@ -79,7 +99,7 @@ class CalculatePackageService:
                     if best_pallet != CalculatePackageService.find_best_box_for_group(group,pallets):
                         break
                             
-        return packages
+        return package_details,packages
     
     @staticmethod
     def find_best_box_for_group(group, pallets):
@@ -115,7 +135,9 @@ class CalculatePackageService:
     def place_products_in_pallets(order_details:List[OrderDetail],pallets:List[Pallet]):
         
         remaining_products = []
-        packages:List[PackageDetail] = []
+        package_details:List[PackageDetail] = []
+        packages:List[Package] = []
+        
         for order_detail in order_details:
             remaining_quantity = order_detail.count
             for pallet in pallets:
@@ -138,24 +160,26 @@ class CalculatePackageService:
                     if total_capacity > 0:
                         boxes_needed = (order_detail.count + total_capacity - 1) // total_capacity  # Round up
                         
-                        package=Package(order=order_detail.order,pallet=pallet,rotation="V")
+                        
                         placed_quantity_per_box = min(remaining_quantity, int(total_capacity))
                         
                         for _ in range(int(boxes_needed)):
                             if remaining_quantity <= 0:
                                 break
+                            package=Package(order=order_detail.order,pallet=pallet,rotation="V")
+                            packages.append(package)
                             placed_quantity = min(placed_quantity_per_box, remaining_quantity)
                             
                             package_detail_instance = PackageDetail(package = package,product=order_detail.product,count=placed_quantity) 
                             
-                            packages.append(package_detail_instance)
+                            package_details.append(package_detail_instance)
                             
                             remaining_quantity -= placed_quantity
                             
                         remaining_quantity -= total_capacity * boxes_needed
                         if remaining_quantity <= 0 or total_capacity > remaining_quantity:
                             break
-        return remaining_products,packages
+        return remaining_products,package_details,packages
     
     @staticmethod
     def can_fit_exactly(order_detail:OrderDetail, pallet:Pallet):

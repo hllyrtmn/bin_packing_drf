@@ -5,14 +5,14 @@ from products.serializers import ProductSerializer
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
-        fields = '__all__'
+        fields = ['company_name','country']
         
 class OrderSerializer(serializers.ModelSerializer):
     company = CompanySerializer()
 
     class Meta:
         model = Order
-        fields = '__all__'
+        fields = ['company','date']
         
 class OrderDetailSerializer(serializers.ModelSerializer):
     order = OrderSerializer()
@@ -20,13 +20,13 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = OrderDetail
-        fields = '__all__'
+        fields = ['order','product','count','unit_price']
 
 class OrderResultSerializer(serializers.ModelSerializer):
     order = OrderSerializer()
 
     class Meta:
         model = OrderResult
-        fields = '__all__'
+        fields = ['order','result']
 
 

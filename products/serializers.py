@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import ProductType, Dimension, WeightType, Product
 
+
 class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductType
@@ -9,7 +10,7 @@ class ProductTypeSerializer(serializers.ModelSerializer):
 class DimensionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dimension
-        fields = '__all__'
+        fields = ['width','height','depth','unit','volume']
 
 class WeightTypeSerializer(serializers.ModelSerializer):
     class Meta:
