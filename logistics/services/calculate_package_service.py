@@ -1,11 +1,8 @@
-from collections import defaultdict
 import copy
 from typing import List
 
 from logistics.models import PackageDetail,Package, Pallet
-from logistics.serializers import PackageDetailSerializer
 from orders.models import OrderDetail
-from products.models import Product
 
 
 class CalculatePackageService:
