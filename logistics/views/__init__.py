@@ -2,3 +2,4 @@ from .calculate_package_view import CalculatePackageView
 from .package_detail_view import PackageDetailViewSet
 from .package_view import PackageViewSet
 from .pallet_view import PalletViewSet
+from .calculate_bin_packing_view import CalculateBinPackingView

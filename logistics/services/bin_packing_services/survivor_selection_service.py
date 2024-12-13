@@ -1,12 +1,12 @@
-from logistics.services.bin_packing_services.fitnesscalc_service import FitnessCalc
-from logistics.services.bin_packing_services.nsga2_service import Nsga2
+from logistics.services.bin_packing_services.fitnesscalc_service import FitnessCalculateService
+from logistics.services.bin_packing_services.nsga2_service import Nsga2Service
 
 class SurvivorSelectionService:
     @staticmethod
     def select(population, offsprings, truck, boxes, total_value, count):
         survivors = {}
-        offspring, fitness = FitnessCalc.evaluate(offsprings, truck, boxes, total_value)
-        offspring = Nsga2.rank(offspring, fitness)
+        offspring, fitness = FitnessCalculateService.evaluate(offsprings, truck, boxes, total_value)
+        offspring = Nsga2Service.rank(offspring, fitness)
         pool = list(population.values()) + list(offspring.values())
         i = 1
         while len(survivors) < count:

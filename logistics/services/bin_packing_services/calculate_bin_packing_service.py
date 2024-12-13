@@ -1,19 +1,19 @@
 from copy import deepcopy
 from tabulate import tabulate
 
-from logistics.services.bin_packing_services.fitnesscalc_service import FitnessCalc
-from logistics.services.bin_packing_services.mutation_service import Mutation
-from logistics.services.bin_packing_services.nsga2_service import Nsga2
+from logistics.services.bin_packing_services.fitnesscalc_service import FitnessCalculateService
+from logistics.services.bin_packing_services.mutation_service import MutationService
+from logistics.services.bin_packing_services.nsga2_service import Nsga2Service
 from logistics.services.bin_packing_services.population_service import PopulationService
-from logistics.services.bin_packing_services.recombination_service import Recombination
-from logistics.services.bin_packing_services.survivor_selection_service import SurvivorSelection
+from logistics.services.bin_packing_services.recombination_service import RecombinationService
+from logistics.services.bin_packing_services.survivor_selection_service import SurvivorSelectionService
 from logistics.services.bin_packing_services.visualize_plotly_service import VisualizePlotlyService
 
 
 class CalculateBinPackingService:
     
     @staticmethod
-    def calculate_bin_packing():
+    def calculate_bin_packing(packages):
         NUM_OF_ITERATIONS = 1
         NUM_OF_INDIVIDUALS = 36
         NUM_OF_GENERATIONS = 200
@@ -31,9 +31,9 @@ class CalculateBinPackingService:
         # final_boxes,packages = p_p.calculate_box_informations(products,pallets) burada final boxes lazim
         
         # Extracting inputs from the excel file
+        
         data = {} #burada datayi benzet ## truck.TruckData(truck_dimension=[1198,235,120],number=len(final_boxes),boxes=final_boxes,solution=[],total_value=1800)
         truck_dimension = data.truck_dimension
-        packages = data.solution
         boxes = data.boxes
         total_value = data.total_value
         box_count = data.number
@@ -54,11 +54,11 @@ class CalculateBinPackingService:
             average_fitness = []
             
             while gen < NUM_OF_GENERATIONS:
-                population, fitness = FitnessCalc.evaluate(population, truck_dimension, box_params, total_value)
-                population = Nsga2.rank(population, fitness)
-                offsprings = Recombination.crossover(deepcopy(population), PC, k=K)
-                offsprings = Mutation.mutate(offsprings, PM1, PM2, ROTATIONS)
-                population = SurvivorSelection.select(population, offsprings, truck_dimension, box_params, total_value,
+                population, fitness = FitnessCalculateService.evaluate(population, truck_dimension, box_params, total_value)
+                population = Nsga2Service.rank(population, fitness)
+                offsprings = RecombinationService.crossover(deepcopy(population), PC, k=K)
+                offsprings = MutationService.mutate(offsprings, PM1, PM2, ROTATIONS)
+                population = SurvivorSelectionService.select(population, offsprings, truck_dimension, box_params, total_value,
                                         NUM_OF_INDIVIDUALS)
                 average_fitness.append(CalculateBinPackingService.calc_average_fitness(population))
                 gen += 1    
