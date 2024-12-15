@@ -7,9 +7,10 @@ from logistics.services.bin_packing_services.calculate_bin_packing_service impor
 class CalculateBinPackingView(APIView):
     def get(self, request, order_id):
         try:
-            # OrderDetail'den ürünleri al
+            # OrderDetail'den package al
             packages = Package.objects.filter(order__id=order_id)
 
+            print(packages)
             result = CalculateBinPackingService.calculate_bin_packing(packages)
             
             return Response({{"message": "Packages saved successfully!"}}, status=200)

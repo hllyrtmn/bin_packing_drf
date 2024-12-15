@@ -13,6 +13,6 @@ router.register('package-details', PackageDetailViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('calculate-box/<uuid:order_id>/', CalculatePackageView.as_view(), name='calculate-box'),
     path('calculate-packing/<uuid:order_id>/', CalculateBinPackingView.as_view(), name='calculate-packing'),
+    path('calculate-box/<uuid:order_id>/', CalculatePackageView.as_view(), name='calculate-box')
 ]
