@@ -21,8 +21,7 @@ class CalculatePackageService:
                 package = Package.objects.create(
                     id=package_id,
                     order_id=order_id,
-                    pallet_id=detail_data.package.pallet_id,
-                    rotation=detail_data.package.rotation
+                    pallet_id=detail_data.package.pallet_id
                 )
                 package_map[package_id] = package
             else:
@@ -76,7 +75,7 @@ class CalculatePackageService:
                     placed_quantity = min(total_capacity, total_quantity)
                     total_placed = 0
                     
-                    package=Package(order=None,pallet=best_pallet,rotation="V")
+                    package=Package(order=None,pallet=best_pallet)
                     packages.append(package)
                     for order_detail in group:
                         if total_placed >= placed_quantity:
@@ -163,7 +162,7 @@ class CalculatePackageService:
                         for _ in range(int(boxes_needed)):
                             if remaining_quantity <= 0:
                                 break
-                            package=Package(order=order_detail.order,pallet=pallet,rotation="V")
+                            package=Package(order=order_detail.order,pallet=pallet)
                             packages.append(package)
                             placed_quantity = min(placed_quantity_per_box, remaining_quantity)
                             

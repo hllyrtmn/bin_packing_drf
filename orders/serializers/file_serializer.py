@@ -6,12 +6,12 @@ import uuid
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = ['id', 'file', 'status', 'uploaded_at', 'order']
-        read_only_fields = ['id', 'status', 'uploaded_at', 'order']
+        fields = ['id', 'file', 'order']
+        read_only_fields = ['id', 'order']
 
     def create(self, validated_data):
         # Varsayılan company_id
-        default_company_id = uuid.UUID("3b619a1a-bc3f-42b6-84b8-e312bd984c21")
+        default_company_id = uuid.UUID("9bbb2ba0-d55d-4537-a95d-a878715478c3")
         # Yeni bir Order oluştur
         order = Order.objects.create(
             company_id=default_company_id,

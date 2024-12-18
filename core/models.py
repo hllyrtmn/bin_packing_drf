@@ -21,3 +21,10 @@ class BaseTrackingModel(models.Model):
     class Meta:
         abstract = True
         
+    def save(self, *args, **kwargs):
+        request = kwargs.pop('request', None)  # `request` objesini kwargs'dan al
+        if request:
+            if not self.pk:  # Yeni bir nesne oluşturuluyorsa
+                self.created_by = request.user
+            self.updated_by = request.user
+        super().save(*args, **kwargs)

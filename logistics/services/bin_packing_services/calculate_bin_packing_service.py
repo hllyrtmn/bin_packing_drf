@@ -10,12 +10,13 @@ from logistics.services.bin_packing_services.recombination_service import Recomb
 from logistics.services.bin_packing_services.survivor_selection_service import SurvivorSelectionService
 from logistics.services.bin_packing_services.visualize_plotly_service import VisualizePlotlyService
 from logistics.models import PackageDetail
+from orders.models import OrderResult
 
 
 class CalculateBinPackingService:
     
     @staticmethod
-    def calculate_bin_packing(packages):
+    def calculate_bin_packing(packages,truck):
         NUM_OF_ITERATIONS = 1
         NUM_OF_INDIVIDUALS = 36
         NUM_OF_GENERATIONS = 1
@@ -39,7 +40,7 @@ class CalculateBinPackingService:
                 total_weight += p_detail.count * p_detail.product.weight_type.std
             pallets.append([package.pallet.dimension.width,package.pallet.dimension.depth,package.pallet.dimension.height,package.pallet.dimension.volume,total_weight,package.pallet.dimension.volume])
         # Extracting inputs from the excel file
-        
+        order_result = OrderResult.objects.get_or_create(order= packages[0].order)
         # data = {
         #     'truck_dimension' : [11980,2350,2400],
         #     'number' : len(packages),
@@ -47,7 +48,7 @@ class CalculateBinPackingService:
         #     'total_value' : 'total_value'} 
         
         #burada datayi benzet ## truck.TruckData(truck_dimension=[1198,235,120],number=len(final_boxes),boxes=final_boxes,solution=[],total_value=1800)
-        truck_dimension = [11980,2350,2400]
+        truck_dimension = [truck.dimension.width,truck.dimension.depth,truck.dimension.height]
         boxes =  pallets
         total_value = sum(pallet[4] for pallet in pallets)
         total_volume = sum(pallet[5] for pallet in pallets)
@@ -83,6 +84,7 @@ class CalculateBinPackingService:
                                         NUM_OF_INDIVIDUALS)
                 average_fitness.append(CalculateBinPackingService.calc_average_fitness(population))
                 gen += 1    
+                order_result[0].progress =+ 1
             results = []
 
         # Storing the final Rank 1 solutions
@@ -92,6 +94,7 @@ class CalculateBinPackingService:
             converted_data = CalculateBinPackingService.convert_decimals_to_int(results)
             # Plot using plotly
             #color_index = vis.draw_solution(pieces=packages)
+            order_result[0].result = converted_data
             color_index = VisualizePlotlyService.draw_solution(pieces=converted_data[0],truck_dimension=truck_dimension)
             
             VisualizePlotlyService.draw(converted_data, color_index)

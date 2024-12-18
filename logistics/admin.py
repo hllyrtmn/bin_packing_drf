@@ -1,6 +1,12 @@
 from django.contrib import admin
+
+from core.admin import BaseAdmin
 from .models import *
 # Register your models here.
-admin.site.register(Pallet)
-admin.site.register(Package)
-admin.site.register(PackageDetail)
+
+@admin.register(Pallet,Package,PackageDetail,Truck)
+class LogisticAdmin(BaseAdmin):
+    """
+    Product admin sınıfı, `BaseAdmin`'i kullanır ve
+    `created_by` ve `updated_by` alanlarını otomatik olarak doldurur.
+    """

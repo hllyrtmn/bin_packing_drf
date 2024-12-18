@@ -14,7 +14,7 @@ class Dimension(BaseTrackingModel):
     depth = models.DecimalField(max_digits=15, decimal_places=6)
     unit = models.CharField(max_length=10)
     dimension_type = models.CharField(max_length=20)
-    volume = models.DecimalField(max_digits=20, decimal_places=10, editable=False)  # Auto-calculated
+    volume = models.DecimalField(max_digits=30, decimal_places=10, editable=False)  # Auto-calculated
 
     def save(self, *args, **kwargs):
         self.volume = self.width * self.height * self.depth
