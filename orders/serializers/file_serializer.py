@@ -1,9 +1,9 @@
 from datetime import datetime
-from rest_framework import serializers
+from core.serializers import BaseTrackingSerializer
 from orders.models import File, Order
 import uuid
 
-class FileSerializer(serializers.ModelSerializer):
+class FileSerializer(BaseTrackingSerializer):
     class Meta:
         model = File
         fields = ['id', 'file', 'order']

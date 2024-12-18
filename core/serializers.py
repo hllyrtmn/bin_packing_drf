@@ -5,6 +5,7 @@ class BaseTrackingSerializer(serializers.ModelSerializer):
     updated_by_username = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
+        abstract = True
         fields = [
             'created_at', 
             'updated_at', 

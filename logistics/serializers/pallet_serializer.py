@@ -1,10 +1,9 @@
-from rest_framework import serializers
-
+from core.serializers import BaseTrackingSerializer
 from products.serializers import DimensionSerializer
 from logistics.models import Pallet
 
-class PalletSerializer(serializers.ModelSerializer):
+class PalletSerializer(BaseTrackingSerializer):
     dimension = DimensionSerializer()
     class Meta:
         model = Pallet
-        fields = ['weight','dimension']
+        fields =BaseTrackingSerializer.Meta.fields + ['weight','dimension']

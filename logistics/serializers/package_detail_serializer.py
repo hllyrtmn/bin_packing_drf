@@ -1,10 +1,9 @@
-from rest_framework import serializers
 from products.serializers import ProductSerializer
 from logistics.serializers.package_serializer import PackageSerializer
 from logistics.models import PackageDetail
 from core.serializers import BaseTrackingSerializer
 
-class PackageDetailSerializer(BaseTrackingSerializer,serializers.ModelSerializer):
+class PackageDetailSerializer(BaseTrackingSerializer):
     package = PackageSerializer()
     product = ProductSerializer()
     

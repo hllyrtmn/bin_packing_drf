@@ -1,20 +1,20 @@
-from rest_framework import serializers
+from core.serializers import BaseTrackingSerializer
 from orders.models import Order,OrderDetail,Company,OrderResult
 from products.serializers import ProductSerializer
 
-class CompanySerializer(serializers.ModelSerializer):
+class CompanySerializer(BaseTrackingSerializer):
     class Meta:
         model = Company
         fields = ['company_name','country']
         
-class OrderSerializer(serializers.ModelSerializer):
+class OrderSerializer(BaseTrackingSerializer):
     company = CompanySerializer()
 
     class Meta:
         model = Order
         fields = ['company','date']
         
-class OrderDetailSerializer(serializers.ModelSerializer):
+class OrderDetailSerializer(BaseTrackingSerializer):
     order = OrderSerializer()
     product = ProductSerializer()
     
@@ -22,7 +22,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         model = OrderDetail
         fields = ['order','product','count','unit_price']
 
-class OrderResultSerializer(serializers.ModelSerializer):
+class OrderResultSerializer(BaseTrackingSerializer):
     order = OrderSerializer()
 
     class Meta:

@@ -1,23 +1,23 @@
-from rest_framework import serializers
+from core.serializers import BaseTrackingSerializer
 from .models import ProductType, Dimension, WeightType, Product
 
 
-class ProductTypeSerializer(serializers.ModelSerializer):
+class ProductTypeSerializer(BaseTrackingSerializer):
     class Meta:
         model = ProductType
         fields = '__all__'
 
-class DimensionSerializer(serializers.ModelSerializer):
+class DimensionSerializer(BaseTrackingSerializer):
     class Meta:
         model = Dimension
         fields = ['width','height','depth','unit','volume']
 
-class WeightTypeSerializer(serializers.ModelSerializer):
+class WeightTypeSerializer(BaseTrackingSerializer):
     class Meta:
         model = WeightType
         fields = '__all__'
 
-class ProductSerializer(serializers.ModelSerializer):
+class ProductSerializer(BaseTrackingSerializer):
     product_type = ProductTypeSerializer()
     dimension = DimensionSerializer()
     weight_type = WeightTypeSerializer()
