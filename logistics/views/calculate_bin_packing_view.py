@@ -10,10 +10,10 @@ class CalculateBinPackingView(APIView):
             # OrderDetail'den package al
             packages = Package.objects.filter(order__id=order_id)
 
-            print(packages)
-            result = CalculateBinPackingService.calculate_bin_packing(packages)
+            # print(packages)
+            CalculateBinPackingService.calculate_bin_packing(packages)
             
-            return Response({{"message": "Packages saved successfully!"}}, status=200)
+            return Response({"message": "Packages saved successfully!"}, status=200)
         except Exception as e:
             return Response({"error": str(e)}, status=500)
     

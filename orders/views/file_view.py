@@ -1,9 +1,7 @@
-from rest_framework.viewsets import ModelViewSet
 from orders.models import File
 from orders.serializers import FileSerializer
-from rest_framework.permissions import AllowAny
+from core.views import BaseTrackingViewSet
 
-class FileViewSet(ModelViewSet):
+class FileViewSet(BaseTrackingViewSet):
     queryset = File.objects.all()
     serializer_class = FileSerializer
-    permission_classes = [AllowAny]

@@ -1,10 +1,7 @@
-from rest_framework.viewsets import ModelViewSet
-
-from core.permissions import IsOwnerOrReadOnly
 from logistics.models import Package
 from logistics.serializers import PackageSerializer
+from core.views import BaseTrackingViewSet
 
-class PackageViewSet(ModelViewSet):
+class PackageViewSet(BaseTrackingViewSet):
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
-    permission_classes = [IsOwnerOrReadOnly]

@@ -17,7 +17,7 @@ class CalculatePackageView(APIView):
             packages = CalculatePackageService.create_packages(order_details, pallets)
             CalculatePackageService.save_packages_and_details_to_db(packages,order_id)
             # Sonuçları döndür
-            return Response({{"message": "Packages saved successfully!"}}, status=200)
+            return Response({"message": "Packages saved successfully!"}, status=200)
         except Exception as e:
             return Response({"error": str(e)}, status=500)
     

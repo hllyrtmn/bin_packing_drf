@@ -1,4 +1,7 @@
 
+from decimal import Decimal
+
+
 class Nsga2Service:
     """
     This module ranks the population into different fronts and also calculates the crowding distance according to NSGA 2
@@ -12,14 +15,16 @@ class Nsga2Service:
         for rank in ranks:
             group = {k: v for k, v in solutions.items() if v[3] == rank}
             for value in group.values():
-                value.append(0)
+                value.append(Decimal(0))
+                for i in range(len(value)):
+                    value[i] = Decimal(value[i]) if isinstance(value[i], (int, float)) else value[i]
             for i in range(obj):
                 sorted_group = dict(sorted(group.items(), key=lambda x: x[1][i]))
                 list1 = list(sorted_group.values())
-                list1[0][4] = 5000
-                list1[-1][4] = 5000
+                list1[0][4] = Decimal(5000)
+                list1[-1][4] = Decimal(5000)
                 for j in range(1, len(list1) - 1):
-                    list1[j][4] += (list1[j + 1][i] - list1[j - 1][i]) / 100
+                    list1[j][4] += (list1[j + 1][i] - list1[j - 1][i]) / Decimal(100)
             dict1.update(group)
         return dict1
 

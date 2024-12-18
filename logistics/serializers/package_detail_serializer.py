@@ -2,14 +2,15 @@ from rest_framework import serializers
 from products.serializers import ProductSerializer
 from logistics.serializers.package_serializer import PackageSerializer
 from logistics.models import PackageDetail
+from core.serializers import BaseTrackingSerializer
 
-class PackageDetailSerializer(serializers.ModelSerializer):
+class PackageDetailSerializer(BaseTrackingSerializer,serializers.ModelSerializer):
     package = PackageSerializer()
     product = ProductSerializer()
     
-    class Meta:
+    class Meta(BaseTrackingSerializer.Meta):
         model = PackageDetail
-        fields = ['package','product','count']
+        fields = BaseTrackingSerializer.Meta.fields + ['package','product','count']
     
     def create(self, validated_data):
         # Product'ı doğrula

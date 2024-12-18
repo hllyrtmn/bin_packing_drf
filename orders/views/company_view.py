@@ -1,7 +1,7 @@
-from rest_framework.viewsets import ModelViewSet
 from orders.models import Company
 from orders.serializers import CompanySerializer
+from core.views import BaseTrackingViewSet
 
-class CompanyViewSet(ModelViewSet):
+class CompanyViewSet(BaseTrackingViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
