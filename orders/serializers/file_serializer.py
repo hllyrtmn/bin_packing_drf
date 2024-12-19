@@ -4,7 +4,7 @@ from orders.models import File, Order
 import uuid
 
 class FileSerializer(BaseTrackingSerializer):
-    class Meta:
+    class Meta(BaseTrackingSerializer.Meta):
         model = File
         fields = ['id', 'file', 'order']
         read_only_fields = ['id', 'order']

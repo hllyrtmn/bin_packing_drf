@@ -4,6 +4,6 @@ from logistics.models import Truck
 
 class TruckSerializer(BaseTrackingSerializer):
     dimension = DimensionSerializer()
-    class Meta:
+    class Meta(BaseTrackingSerializer.Meta):
         model = Truck
         fields = BaseTrackingSerializer.Meta.fields + ['weight_limit','dimension']

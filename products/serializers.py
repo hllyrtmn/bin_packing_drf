@@ -3,17 +3,17 @@ from .models import ProductType, Dimension, WeightType, Product
 
 
 class ProductTypeSerializer(BaseTrackingSerializer):
-    class Meta:
+    class Meta(BaseTrackingSerializer.Meta):
         model = ProductType
         fields = '__all__'
 
 class DimensionSerializer(BaseTrackingSerializer):
-    class Meta:
+    class Meta(BaseTrackingSerializer.Meta):
         model = Dimension
         fields = ['width','height','depth','unit','volume']
 
 class WeightTypeSerializer(BaseTrackingSerializer):
-    class Meta:
+    class Meta(BaseTrackingSerializer.Meta):
         model = WeightType
         fields = '__all__'
 
@@ -22,7 +22,7 @@ class ProductSerializer(BaseTrackingSerializer):
     dimension = DimensionSerializer()
     weight_type = WeightTypeSerializer()
 
-    class Meta:
+    class Meta(BaseTrackingSerializer.Meta):
         model = Product
         fields = '__all__'
         

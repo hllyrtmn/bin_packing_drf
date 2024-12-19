@@ -1,23 +1,6 @@
 from rest_framework.response import Response
 from rest_framework import status
 
-class UserTrackingMixin:
-    def perform_create(self, serializer):
-        """
-        Yeni bir nesne oluşturulurken `created_by` ve `updated_by` alanlarını doldurur.
-        """
-        serializer.save(
-            created_by=self.request.user,
-            updated_by=self.request.user
-        )
-
-    def perform_update(self, serializer):
-        if hasattr(self.request, 'user'):
-            serializer.save(updated_by=self.request.user)
-        else:
-            serializer.save()
-
-
 class BaseModelMixin:
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -35,7 +18,7 @@ class CreateModelMixin:
 
 class UpdateModelMixin:
     def perform_update(self, serializer):
-        serializer.save(updated_by=self.request.user,updated_by = self.request.user)
+        serializer.save(updated_by=self.request.user,created_by = self.request.user)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)

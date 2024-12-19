@@ -4,6 +4,6 @@ from logistics.models import Pallet
 
 class PalletSerializer(BaseTrackingSerializer):
     dimension = DimensionSerializer()
-    class Meta:
+    class Meta(BaseTrackingSerializer.Meta):
         model = Pallet
         fields =BaseTrackingSerializer.Meta.fields + ['weight','dimension']

@@ -6,7 +6,7 @@ from logistics.models import Package
 class PackageSerializer(BaseTrackingSerializer):
     pallet = PalletSerializer()
     order = OrderSerializer()
-    class Meta:
+    class Meta(BaseTrackingSerializer.Meta):
         model = Package
         fields = BaseTrackingSerializer.Meta.fields + ['pallet','rotation','order']
     def create(self, validated_data):
