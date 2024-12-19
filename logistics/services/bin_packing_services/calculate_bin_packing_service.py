@@ -1,5 +1,6 @@
 from copy import deepcopy
 from decimal import Decimal
+import json
 from tabulate import tabulate
 
 from logistics.services.bin_packing_services.fitnesscalc_service import FitnessCalculateService
@@ -12,8 +13,18 @@ from logistics.services.bin_packing_services.visualize_plotly_service import Vis
 from logistics.models import PackageDetail
 from orders.models import OrderResult
 
-
 class CalculateBinPackingService:
+    
+    @staticmethod
+    def update_order_result(order_result_id,updated_data):
+        try:
+            order_result = OrderResult.objects.get(id=order_result_id)
+            for key, value in updated_data.items():
+                setattr(order_result, key, value)
+            order_result.save()
+            return order_result
+        except OrderResult.DoesNotExist:
+            raise ValueError("order result not found")
     
     @staticmethod
     def calculate_bin_packing(packages,truck):
@@ -39,15 +50,9 @@ class CalculateBinPackingService:
             for p_detail in package_detail:
                 total_weight += p_detail.count * p_detail.product.weight_type.std
             pallets.append([package.pallet.dimension.width,package.pallet.dimension.depth,package.pallet.dimension.height,package.pallet.dimension.volume,total_weight,package.pallet.dimension.volume])
-        # Extracting inputs from the excel file
-        order_result = OrderResult.objects.get_or_create(order= packages[0].order)
-        # data = {
-        #     'truck_dimension' : [11980,2350,2400],
-        #     'number' : len(packages),
-        #     'boxes' : [['width','depth','height','volume','total_weight'],['width','depth','height','volume','total_weight']],
-        #     'total_value' : 'total_value'} 
         
-        #burada datayi benzet ## truck.TruckData(truck_dimension=[1198,235,120],number=len(final_boxes),boxes=final_boxes,solution=[],total_value=1800)
+        order_result = OrderResult.objects.create(order = packages[0].order)
+        
         truck_dimension = [truck.dimension.width,truck.dimension.depth,truck.dimension.height]
         boxes =  pallets
         total_value = sum(pallet[4] for pallet in pallets)
@@ -73,8 +78,9 @@ class CalculateBinPackingService:
             population = PopulationService.generate_pop(box_params, NUM_OF_INDIVIDUALS, ROTATIONS)
             
             gen = 0
+            progress = 0
             average_fitness = []
-            
+            step = int(100 / NUM_OF_ITERATIONS)
             while gen < NUM_OF_GENERATIONS:
                 population, fitness = FitnessCalculateService.evaluate(population, truck_dimension, box_params, total_value)
                 population = Nsga2Service.rank(population, fitness)
@@ -83,8 +89,12 @@ class CalculateBinPackingService:
                 population = SurvivorSelectionService.select(population, offsprings, truck_dimension, box_params, total_value,
                                         NUM_OF_INDIVIDUALS)
                 average_fitness.append(CalculateBinPackingService.calc_average_fitness(population))
-                gen += 1    
-                order_result[0].progress =+ 1
+                gen += 1
+                progress += step
+                updated_data = {
+                    "progress": progress
+                }    
+                CalculateBinPackingService.update_order_result(order_result.id,updated_data)
             results = []
 
         # Storing the final Rank 1 solutions
@@ -94,10 +104,18 @@ class CalculateBinPackingService:
             converted_data = CalculateBinPackingService.convert_decimals_to_int(results)
             # Plot using plotly
             #color_index = vis.draw_solution(pieces=packages)
-            order_result[0].result = converted_data
-            color_index = VisualizePlotlyService.draw_solution(pieces=converted_data[0],truck_dimension=truck_dimension)
             
-            VisualizePlotlyService.draw(converted_data, color_index)
+            updated_data = {
+                "progress": 100,
+                "success": True,
+                "result": converted_data
+            }
+            CalculateBinPackingService.update_order_result(order_result.id,updated_data)
+            order_result = OrderResult.objects.get(id=order_result.id)
+            data = json.loads(order_result.result)
+            color_index = VisualizePlotlyService.draw_solution(pieces=data[0],truck_dimension=truck_dimension)
+            
+            # VisualizePlotlyService.draw(converted_data, color_index) # Burasi 4 tane sonuc veriyor
             
             print(tabulate(
             [['Problem Set', 0], ['Runs', NUM_OF_ITERATIONS], ['Avg. Volume%', sum(average_vol) / len(average_vol)],
@@ -108,13 +126,10 @@ class CalculateBinPackingService:
     @staticmethod
     def convert_decimals_to_int(data):
         if isinstance(data, list):
-            # Eğer veri bir listeyse, her bir elemanı dönüştür
             return [CalculateBinPackingService.convert_decimals_to_int(item) for item in data]
         elif isinstance(data, Decimal):
-            # Eğer veri Decimal ise, int'e çevir
             return int(data)
         else:
-            # Diğer durumlarda, olduğu gibi bırak
             return data  
 
     @staticmethod

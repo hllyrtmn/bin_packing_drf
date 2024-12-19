@@ -31,7 +31,7 @@ class OrderDetail(BaseTrackingModel):
 class OrderResult(BaseTrackingModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='results')
-    result = models.CharField(max_length=1000)
+    result = models.TextField()
     success = models.BooleanField(default=False)
     progress = models.IntegerField(default=0,validators=[MinValueValidator(0),MaxValueValidator(100)])
     
