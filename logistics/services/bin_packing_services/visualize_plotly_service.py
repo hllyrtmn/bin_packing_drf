@@ -4,27 +4,6 @@ import plotly.colors
 from plotly.subplots import make_subplots
 
 class VisualizePlotlyService:
-    
-    pallete = ['darkgreen', 'tomato', 'yellow', 'darkblue', 'darkviolet', 'indianred', 'yellowgreen', 'mediumblue', 'cyan',
-            'black', 'indigo', 'pink', 'lime', 'sienna', 'plum', 'deepskyblue', 'forestgreen', 'fuchsia', 'brown',
-            'turquoise', 'aliceblue', 'blueviolet', 'rosybrown', 'powderblue', 'lightblue', 'skyblue', 'lightskyblue',
-            'steelblue', 'dodgerblue', 'lightslategray', 'lightslategrey', 'slategray',
-            'slategrey', 'lightsteelblue', 'cornflowerblue', 'royalblue', 'ghostwhite', 'lavender',
-            'midnightblue', 'navy', 'darkblue', 'blue', 'slateblue', 'darkslateblue',
-            'mediumslateblue', 'mediumpurple', 'rebeccapurple', 'darkorchid',
-            'darkviolet', 'mediumorchid']
-    color_pallete = ['lightcoral', 'firebrick', 'maroon', 'darkred', 'red',
-                    'salmon', 'darksalmon', 'coral', 'orangered', 'lightsalmon', 'chocolate',
-                    'saddlebrown',
-                    'sandybrown', 'olive', 'olivedrab', 'darkolivegreen', 'greenyellow',
-                    'chartreuse', 'lawngreen',
-                    'darkseagreen', 'palegreen', 'lightgreen', 'limegreen',
-                    'green', 'seagreen', 'mediumseagreen', 'springgreen', 'mediumspringgreen',
-                    'mediumaquamarine', 'aquamarine', 'lightseagreen', 'mediumturquoise',
-                    'lightcyan', 'paleturquoise', 'darkslategray', 'darkslategrey', 'teal', 'darkcyan', 'aqua', 'cyan',
-                    'darkturquoise', 'cadetblue', 'thistle', 'violet', 'purple', 'darkmagenta',
-                    'magenta', 'orchid', 'mediumvioletred', 'deeppink', 'hotpink', 'lavenderblush', 'palevioletred',
-                    'crimson', 'lightpink']
 
     @staticmethod
     def cube_data(position3d, size=(1, 1, 1)):
@@ -114,7 +93,7 @@ class VisualizePlotlyService:
             sizes.append(each[3:6])
             sorted_size.append(set(each[3:6]))
             
-            texts.append(f'Palet {each[6]}<br>Ağırlık: {each[7]} kg<br>X: {each[3]} <br>Y: {each[4]}<br>Z: {each[5]}')
+            texts.append(f'Palet {each[6]}<br>Ağırlık: {each[7]} kg<br>X: {each[3]} <br>Y: {each[4]}')
 
         colors =  plotly.colors.qualitative.Pastel1 + plotly.colors.qualitative.Pastel2 + plotly.colors.qualitative.Set3
         color_index = [sorted_size, colors]
@@ -145,7 +124,7 @@ class VisualizePlotlyService:
                 text=[text],
                 textposition="middle center",
                 name=f'{text}',  # Sağ panelde görülecek isim
-                showlegend=True,  # Sağ tarafta gösterilsin
+                showlegend=False,  # Sağ tarafta gösterilsin
                 marker=dict(size=6, color='black', symbol='circle')
             ))
         
@@ -160,26 +139,57 @@ class VisualizePlotlyService:
             'z': truck_dimension[2] / max_range,
         }
         
+        edge_traces = []
+        for pos, size in zip(positions, sizes):
+            x0, y0, z0 = pos  # Başlangıç noktası
+            w, l, h = size  # Genişlik, uzunluk, yükseklik
+
+            # Kenarları belirle
+            edges = [
+                [(x0, y0, z0), (x0 + w, y0, z0)],
+                [(x0, y0, z0), (x0, y0 + l, z0)],
+                [(x0, y0, z0), (x0, y0, z0 + h)],
+                [(x0 + w, y0, z0), (x0 + w, y0 + l, z0)],
+                [(x0, y0 + l, z0), (x0 + w, y0 + l, z0)],
+                [(x0, y0, z0 + h), (x0 + w, y0, z0 + h)],
+                [(x0, y0, z0 + h), (x0, y0 + l, z0 + h)],
+                [(x0 + w, y0, z0 + h), (x0 + w, y0 + l, z0 + h)],
+                [(x0, y0 + l, z0 + h), (x0 + w, y0 + l, z0 + h)]
+            ]
+
+            # Kenarları çizgi olarak ekle
+            for edge in edges:
+                x_vals, y_vals, z_vals = zip(*edge)
+                edge_trace = go.Scatter3d(
+                    x=x_vals, y=y_vals, z=z_vals,
+                    mode='lines',
+                    line=dict(color='black', width=1),  # Kenar rengini ve kalınlığını belirle
+                    showlegend=False
+                )
+                edge_traces.append(edge_trace)
+        
+        
         layout = go.Layout(autosize=True,
                            margin=dict(l=0,r=0,b=0,t=40),
                             title_text='Truck Loading True Solution',
                             title_x=0.5,
+                            dragmode=False,
                             scene=dict(
                             xaxis=dict(title='X Ekseni '+ str(int(truck_dimension[0])), range=x_range,showticklabels=False,showgrid=False,zeroline=False),
                             yaxis=dict(title='Y Ekseni '+ str(int(truck_dimension[1])), range=y_range,showticklabels=False,showgrid=False,zeroline=False),
-                            zaxis=dict(title='Z Ekseni '+ str(int(truck_dimension[2])), range=z_range,showticklabels=False,showgrid=False,zeroline=False),
+                            zaxis=dict(range=z_range,showticklabels=False,showgrid=False,zeroline=False),
                             aspectratio=aspect_ratio,
-                            camera=dict(eye=dict(x=0, y=0, z=0.7),up=dict(x=0, y=-1, z=0))  # 90 derece sola döndür
+                            camera=dict(eye=dict(x=0, y=0, z=0.6),up=dict(x=0, y=1, z=0))  # 90 derece sola döndür
         ))
-        fig = go.Figure(data=[mesh3d] + annotations, layout=layout)
+        fig = go.Figure(data=[mesh3d] + annotations + edge_traces, layout=layout)
         fig.show(config={'responsive':True,'displayModeBar':True,'scrollZoom': False,'staticPlot': False ,'modeBarButtonsToRemove': [
         'zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d',
         'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian',
         'orbitRotation', 'tableRotation', 'resetCameraDefault3d', 'resetCameraLastSave3d'
-        ],  # İstenmeyen tüm butonları kaldır
-        'modeBarButtonsToAdd': ['toImage'],  # Sadece PNG indirme butonunu ekle
+        ],  
+        'modeBarButtonsToAdd': ['toImage'], 
         'toImageButtonOptions': {
-            'format': 'png',  # PNG formatı
+            'format': 'png',
             'filename': 'truck_loading_solution'
         }})
         return color_index
