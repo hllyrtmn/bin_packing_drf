@@ -1,5 +1,6 @@
 import plotly.graph_objects as go
 import numpy as np
+import plotly.colors
 from plotly.subplots import make_subplots
 
 class VisualizePlotlyService:
@@ -110,35 +111,42 @@ class VisualizePlotlyService:
         texts = []
         for i, each in enumerate( pieces):
             positions.append(each[0:3])
-            sizes.append(each[3:])
-            sorted_size.append(set(each[3:]))
+            sizes.append(each[3:6])
+            sorted_size.append(set(each[3:6]))
             
-            texts.append(f'Piece {i+1}')
+            texts.append(f'Palet {each[6]}<br>Ağırlık: {each[7]} kg<br>X: {each[3]} <br>Y: {each[4]}<br>Z: {each[5]}')
 
-        colors = VisualizePlotlyService.pallete[:len(positions)]
+        colors =  plotly.colors.qualitative.Pastel1 + plotly.colors.qualitative.Pastel2 + plotly.colors.qualitative.Set3
         color_index = [sorted_size, colors]
         vertices, I, J, K = VisualizePlotlyService.triangulate_cube_faces(positions, sizes=sizes)
-
+        
+        hovertexts_expanded = []
+        for text in texts:
+            hovertexts_expanded.extend([text] * 12)  # Her kutu için 12 yüz
+            
         X, Y, Z = vertices.T
         colors2 = [val for val in colors for _ in range(12)]
-        mesh3d = go.Mesh3d(x=X, y=Y, z=Z, i=I, j=J, k=K, facecolor=colors2, flatshading=True,opacity=0.5,hovertemplate=
-        '<br> X: %{x:.2f}' +
-        '<br> Y: %{y:.2f}' +
-        '<br> Z: %{z:.2f}' +
-        '<br> Intensity: %{intensity:.2f}' +
-        '<extra></extra>')
-        label_positions = np.array([np.array(each[0:3]) + np.array(each[3:]) / 2 for each in pieces])
-        
+        mesh3d = go.Mesh3d(
+        x=X, y=Y, z=Z, i=I, j=J, k=K,
+        facecolor=colors2,
+        flatshading=True,
+        opacity=1,
+        hovertext=hovertexts_expanded,
+        hovertemplate='<b>%{hovertext}</b><br>' +
+                            '<extra></extra>')
+       
         annotations = []
         for pos, size, text in zip(positions, sizes, texts):
             annotations.append(go.Scatter3d(
-                x=[pos[0] + size[0] / 2],
-                y=[pos[1] + size[1] / 2],
-                z=[pos[2] + size[2] / 2],
+                x=[pos[0] + size[0] / 2],  # X ekseninde kutunun merkezine hizala
+                y=[pos[1] + size[1] / 2],  # Y ekseninde kutunun merkezine hizala
+                z=[pos[2] + size[2]],  # Z ekseninde kutunun tam üst yüzeyine hizala
                 mode='text',
                 text=[text],
-                textposition="bottom center",
-                showlegend=False
+                textposition="middle center",
+                name=f'{text}',  # Sağ panelde görülecek isim
+                showlegend=True,  # Sağ tarafta gösterilsin
+                marker=dict(size=6, color='black', symbol='circle')
             ))
         
         x_range = [min(X), truck_dimension[0]]
@@ -152,74 +160,29 @@ class VisualizePlotlyService:
             'z': truck_dimension[2] / max_range,
         }
         
-        layout = go.Layout(width=2000,
-                        height=2000,
-                        title_text='Truck Loading True Solution',
-                        title_x=0.5,
-                        scene=dict(
-                                xaxis=dict(title='X Ekseni', range=x_range),
-                                yaxis=dict(title='Y Ekseni', range=y_range),
-                                zaxis=dict(title='Z Ekseni', range=z_range),
-                                aspectratio=aspect_ratio,
-                                camera_eye_x=-1.75,
-                                camera_eye_y=1.75,
-                                camera_eye_z=1.75)
-                        )
+        layout = go.Layout(autosize=True,
+                           margin=dict(l=0,r=0,b=0,t=40),
+                            title_text='Truck Loading True Solution',
+                            title_x=0.5,
+                            scene=dict(
+                            xaxis=dict(title='X Ekseni '+ str(int(truck_dimension[0])), range=x_range,showticklabels=False,showgrid=False,zeroline=False),
+                            yaxis=dict(title='Y Ekseni '+ str(int(truck_dimension[1])), range=y_range,showticklabels=False,showgrid=False,zeroline=False),
+                            zaxis=dict(title='Z Ekseni '+ str(int(truck_dimension[2])), range=z_range,showticklabels=False,showgrid=False,zeroline=False),
+                            aspectratio=aspect_ratio,
+                            camera=dict(eye=dict(x=0, y=0, z=0.7),up=dict(x=0, y=-1, z=0))  # 90 derece sola döndür
+        ))
         fig = go.Figure(data=[mesh3d] + annotations, layout=layout)
-        fig.show()
+        fig.show(config={'responsive':True,'displayModeBar':True,'scrollZoom': False,'staticPlot': False ,'modeBarButtonsToRemove': [
+        'zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d',
+        'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian',
+        'orbitRotation', 'tableRotation', 'resetCameraDefault3d', 'resetCameraLastSave3d'
+        ],  # İstenmeyen tüm butonları kaldır
+        'modeBarButtonsToAdd': ['toImage'],  # Sadece PNG indirme butonunu ekle
+        'toImageButtonOptions': {
+            'format': 'png',  # PNG formatı
+            'filename': 'truck_loading_solution'
+        }})
         return color_index
-
-    @staticmethod
-    def draw_solution1(pieces, truck_dimension):
-        positions = []
-        sizes = []
-        texts = []
-        for i, each in enumerate(pieces):
-            positions.append(each[0:3])
-            sizes.append(each[3:])
-            texts.append(f'Piece {i+1}')
-
-        vertices, I, J, K = VisualizePlotlyService.triangulate_cube_faces(positions, sizes=sizes)
-        X, Y, Z = vertices.T
-        face_colors = [VisualizePlotlyService.pallete[i % len(VisualizePlotlyService.pallete)] for i in range(len(positions))]
-        mesh3d = go.Mesh3d(x=X, y=Y, z=Z, i=I, j=J, k=K, facecolor=face_colors, flatshading=True, opacity=0.6)
-
-        annotations = []
-        for pos, size, text in zip(positions, sizes, texts):
-            annotations.append(go.Scatter3d(
-                x=[pos[0] + size[0] / 2],
-                y=[pos[1] + size[1] / 2],
-                z=[pos[2] + size[2] / 2],
-                mode='text',
-                text=[text],
-                showlegend=False
-            ))
-
-        x_range = [min(X), truck_dimension[0]]
-        y_range = [min(Y), truck_dimension[1]]
-        z_range = [min(Z), truck_dimension[2]]
-
-        max_range = max(truck_dimension[0], truck_dimension[1], truck_dimension[2])
-        aspect_ratio = {
-            'x': truck_dimension[0] / max_range,
-            'y': truck_dimension[1] / max_range,
-            'z': truck_dimension[2] / max_range,
-        }
-
-        layout = go.Layout(
-            width=1000,
-            height=1000,
-            title_text='Truck Loading True Solution',
-            title_x=0.5,
-            scene=dict(
-                xaxis=dict(title='X Axis', range=x_range),
-                yaxis=dict(title='Y Axis', range=y_range),
-                zaxis=dict(title='Z Axis', range=z_range),
-                aspectratio=aspect_ratio
-            )
-        )
-        fig = go.Figure(data=[mesh3d] + annotations, layout=layout)
-        fig.show()
 
     @staticmethod
     def draw(results, color_index):
@@ -232,9 +195,9 @@ class VisualizePlotlyService:
             colors = []
             for each in pieces:
                 positions.append(each[0:3])
-                sizes.append(each[3:])
+                sizes.append(each[3:6])
                 for i in range(len(sorted_pieces)):
-                    if set(each[3:]) == sorted_pieces[i]:
+                    if set(each[3:6]) == sorted_pieces[i]:
                         colors.append(clr[i])
 
             vertices, I, J, K = VisualizePlotlyService.triangulate_cube_faces(positions, sizes=sizes)

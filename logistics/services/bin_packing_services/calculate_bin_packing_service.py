@@ -29,7 +29,7 @@ class CalculateBinPackingService:
     @staticmethod
     def calculate_bin_packing(packages,truck):
         NUM_OF_ITERATIONS = 1
-        NUM_OF_INDIVIDUALS = 36
+        NUM_OF_INDIVIDUALS = 100
         NUM_OF_GENERATIONS = 1
         PC = int(0.8 * NUM_OF_INDIVIDUALS)
         PM1 = 0.2
@@ -49,27 +49,20 @@ class CalculateBinPackingService:
             total_weight = package.pallet.weight
             for p_detail in package_detail:
                 total_weight += p_detail.count * p_detail.product.weight_type.std
-            pallets.append([package.pallet.dimension.width,package.pallet.dimension.depth,package.pallet.dimension.height,package.pallet.dimension.volume,total_weight,package.pallet.dimension.volume])
+            pallets.append([package.pallet.dimension.width,package.pallet.dimension.depth,package.pallet.dimension.height,package.pallet.dimension.volume,total_weight])
         
         order_result = OrderResult.objects.create(order = packages[0].order)
         
         truck_dimension = [truck.dimension.width,truck.dimension.depth,truck.dimension.height]
         boxes =  pallets
         total_value = sum(pallet[4] for pallet in pallets)
-        total_volume = sum(pallet[5] for pallet in pallets)
-        total_area = int(sum(pallet[0] * pallet[1] for pallet in pallets))
-        total_truck_area = 11980 * 2350
-        truck_volume = 11980 * 2350 * 2400
         
-        
-        remaining_volume = truck_volume - int(total_volume)
-        box_count = len(pallets)
         box_params = {}
         
         for index in range(len(boxes)):
+            # Storing the average values over every single iteration
             box_params[index] = boxes[index]
         
-            # Storing the average values over every single iteration
         average_vol = []
         average_num = []
         average_value = []
@@ -98,10 +91,14 @@ class CalculateBinPackingService:
             results = []
 
         # Storing the final Rank 1 solutions
+            updated_results = []
             for key, value in population.items(): 
                 if value['Rank'] == 1:
                     results.append(value['result'])
-            converted_data = CalculateBinPackingService.convert_decimals_to_int(results)
+            for res,order_val in zip(results[0],population[0]['order']):
+                updated_res = res + [order_val,box_params[order_val][4]]
+                updated_results.append(updated_res)
+            converted_data = CalculateBinPackingService.convert_decimals_to_int(updated_results)
             # Plot using plotly
             #color_index = vis.draw_solution(pieces=packages)
             
@@ -113,7 +110,7 @@ class CalculateBinPackingService:
             CalculateBinPackingService.update_order_result(order_result.id,updated_data)
             order_result = OrderResult.objects.get(id=order_result.id)
             data = json.loads(order_result.result)
-            color_index = VisualizePlotlyService.draw_solution(pieces=data[0],truck_dimension=truck_dimension)
+            color_index = VisualizePlotlyService.draw_solution(pieces=data,truck_dimension=truck_dimension)
             
             # VisualizePlotlyService.draw(converted_data, color_index) # Burasi 4 tane sonuc veriyor
             

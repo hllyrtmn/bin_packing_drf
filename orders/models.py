@@ -5,9 +5,18 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from core.models import BaseTrackingModel
 
+class CompanyUser(BaseTrackingModel):
+    company = models.ForeignKey('Company', on_delete=models.CASCADE, related_name='company_users')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_companies')
+
+    class Meta:
+        db_table = 'orders_company_users' 
+        unique_together = ('company', 'user')  # Aynı kullanıcı aynı şirkete birden fazla kez atanamaz.
+
+
 class Company(BaseTrackingModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    users = models.ManyToManyField(User,related_name='companies')
+    users = models.ManyToManyField(User,related_name='companies',through='CompanyUser',through_fields=('company', 'user'))
     company_name = models.CharField(max_length=255)
     country = models.CharField(max_length=255)
 
