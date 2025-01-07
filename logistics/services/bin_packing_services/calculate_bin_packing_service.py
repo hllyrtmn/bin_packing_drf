@@ -37,12 +37,6 @@ class CalculateBinPackingService:
         K = 2
         ROTATIONS = 2  # 1 or 2 or 6
         
-        # print("Running Problem Set")
-        # print(tabulate([['Generations', NUM_OF_GENERATIONS], ['Individuals', NUM_OF_INDIVIDUALS],
-        #                     ['Rotations', ROTATIONS], ['Crossover Prob.', PC], ['Mutation Prob1', PM1],
-        #                     ['Mutation Prob2', PM2], ['Tournament Size', K]], headers=['Parameter', 'Value'],
-        #                 tablefmt="github"))
-        # final_boxes,packages = p_p.calculate_box_informations(products,pallets) burada final boxes lazim
         pallets = []
         for package in packages:
             package_detail = PackageDetail.objects.filter(package__id = package.id)
@@ -62,10 +56,6 @@ class CalculateBinPackingService:
         for index in range(len(boxes)):
             # Storing the average values over every single iteration
             box_params[index] = boxes[index]
-        
-        average_vol = []
-        average_num = []
-        average_value = []
         
         for i in range(NUM_OF_ITERATIONS):
             population = PopulationService.generate_pop(box_params, NUM_OF_INDIVIDUALS, ROTATIONS)
@@ -99,8 +89,6 @@ class CalculateBinPackingService:
                 updated_res = res + [order_val,box_params[order_val][4]]
                 updated_results.append(updated_res)
             converted_data = CalculateBinPackingService.convert_decimals_to_int(updated_results)
-            # Plot using plotly
-            #color_index = vis.draw_solution(pieces=packages)
             
             updated_data = {
                 "progress": 100,
@@ -113,12 +101,6 @@ class CalculateBinPackingService:
             color_index = VisualizePlotlyService.draw_solution(pieces=data,truck_dimension=truck_dimension)
             
             # VisualizePlotlyService.draw(converted_data, color_index) # Burasi 4 tane sonuc veriyor
-            
-            print(tabulate(
-            [['Problem Set', 0], ['Runs', NUM_OF_ITERATIONS], ['Avg. Volume%', sum(average_vol) / len(average_vol)],
-                ['Avg. Number%', sum(average_num) / len(average_num)],
-                ['Avg. Value%', sum(average_value) / len(average_value)]],
-            headers=['Parameter', 'Value'], tablefmt="github"))
             
     @staticmethod
     def convert_decimals_to_int(data):
