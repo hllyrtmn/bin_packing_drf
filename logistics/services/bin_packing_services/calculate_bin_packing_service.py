@@ -28,9 +28,9 @@ class CalculateBinPackingService:
     
     @staticmethod
     def calculate_bin_packing(packages,truck):
-        NUM_OF_ITERATIONS = 1
-        NUM_OF_INDIVIDUALS = 100
-        NUM_OF_GENERATIONS = 1
+        NUM_OF_ITERATIONS = 2
+        NUM_OF_INDIVIDUALS = 36
+        NUM_OF_GENERATIONS = 100
         PC = int(0.8 * NUM_OF_INDIVIDUALS)
         PM1 = 0.2
         PM2 = 0.02

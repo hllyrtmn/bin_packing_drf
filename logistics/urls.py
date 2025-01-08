@@ -2,6 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from logistics.views.calculate_bin_packing_view import CalculateBinPackingView
+from logistics.views.excel_operation_view import ExcelOperationView
 from .views import PalletViewSet, PackageViewSet, PackageDetailViewSet,TruckViewSet
 from logistics.views.calculate_package_view import CalculatePackageView
 
@@ -15,5 +16,6 @@ router.register('trucks',TruckViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('calculate-packing/<uuid:order_id>/', CalculateBinPackingView.as_view(), name='calculate-packing'),
-    path('calculate-box/<uuid:order_id>/', CalculatePackageView.as_view(), name='calculate-box')
+    path('calculate-box/<uuid:order_id>/', CalculatePackageView.as_view(), name='calculate-box'),
+    path('create-excel/<uuid:order_id>/', ExcelOperationView.as_view(), name='create-excel')
 ]

@@ -6,3 +6,4 @@ from .bin_packing_services.recombination_service import RecombinationService
 from .bin_packing_services.survivor_selection_service import SurvivorSelectionService
 from .bin_packing_services.visualize_plotly_service import VisualizePlotlyService
 from .bin_packing_services.calculate_bin_packing_service import CalculateBinPackingService
+from .excel_operation_services.settlement_service import SettlementService
